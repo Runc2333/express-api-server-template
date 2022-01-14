@@ -1,9 +1,6 @@
-const express = require('express');
-const router = express.Router();
-
-/* GET home page. */
-router.get('/', function (_req, res) {
-    res.render('index', { title: 'Express' });
-});
-
-module.exports = router;
+module.exports = [{
+    method: 'GET',
+    handler: async (_req, res) => {
+        stdrtn.success(res, 'At your service');
+    }
+}];

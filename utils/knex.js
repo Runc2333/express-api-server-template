@@ -1,19 +1,21 @@
-let knex;
-if (config.database.enable) {
-    knex = require('knex')({
-        client: config.database.client,
-        connection: {
-            host: config.database.config[config.database.client].host,
-            user: config.database.config[config.database.client].user,
-            password: config.database.config[config.database.client].password,
-            database: config.database.config[config.database.client].database,
-        }
-    });
-} else {
-    knex = () => {
-        logger.e('Database is disabled but still being called while running.\nForcing program to stop...');
-        process.exit(-1);
-    };
+let knex_config = {
+    client: config.database.client,
+};
+
+switch (config.database.client) {
+    case 'mysql': {
+        knex_config.connection = `mysql://${config.database.mysql.user}:${config.database.mysql.password}@${config.database.mysql.host}:${config.database.mysql.port}/${config.database.mysql.database}?charset=utf8mb4`;
+        break;
+    }
+    case 'sqlite3': {
+        knex_config.connection = {
+            filename: config.database.sqlite3.filename,
+        };
+        break;
+    }
+    default: {
+        throw new Error('Unknown database client: ' + config.database.client);
+    }
 }
 
-module.exports = knex;
+module.exports = require('knex')(knex_config);
