@@ -1,0 +1,28 @@
+{
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "no-unused-vars": "error",
+        "semi": "error",
+        "no-unexpected-multiline": "error",
+        "space-before-function-paren": [
+            "error",
+            "always"
+        ]
+    },
+    "globals": {
+        "knex": "readonly",
+        "tools": "readonly",
+        "config": "readonly",
+        "logger": "readonly",
+        "stdrtn": "readonly",
+        "processPath": "readonly"
+    }
+}

@@ -3,8 +3,11 @@ global.config = {
         port: 3000
     },
     log: {
-        level: 'info', // debug info warn error
-        path: './server.log'
+        enable: true,
+        console_level: 'info', // Specific level will be output to console, can be trace debug info warn error
+        log_level: 'warn', // Specific level will be write to file, can be trace debug info warn error
+        folder: './log',
+        log_split: true, // split log file by day
     },
     file: {
         maxUploadSize: '5', // megabyte
@@ -30,4 +33,4 @@ global.config = {
             },
         }
     }
-}
+};

@@ -4,8 +4,8 @@ const dateformat = require("dateformat");
 const bind = (req, modal) => {
     if (req.method === 'POST' || req.method === 'DELETE') {
         let params = req.body;
-        var bindObj = {};
-        for (key in modal) {
+        let bindObj = {};
+        for (let key in modal) {
             if (typeof params[key] === modal[key].type) { // 严格判断传入的数据类型
                 if (params[key] === '' && modal[key].required) { // 判断传入数据是否有效
                     stdrtn.paramError(req.res);
@@ -39,10 +39,11 @@ const bind = (req, modal) => {
                 }
             }
         }
+        return bindObj;
     } else if (req.method === 'GET') {
         let params = req.query;
-        var bindObj = {};
-        for (key in modal) {
+        let bindObj = {};
+        for (let key in modal) {
             if (typeof params[key] !== 'undefined') { // 不判断传入数据类型
                 // 强制转换为所需数据类型
                 switch (modal[key].type) {
@@ -96,13 +97,13 @@ const bind = (req, modal) => {
                 }
             }
         }
+        return bindObj;
     }
-    return bindObj;
-}
+};
 
 const bindRtn = (data, modal) => {
     let bindObj = {};
-    for (key in modal) {
+    for (let key in modal) {
         if (typeof data[modal[key].keyname] !== 'undefined') { // 不判断传入数据类型
             // 强制转换为所需数据类型
             switch (modal[key].type) {
@@ -126,9 +127,9 @@ const bindRtn = (data, modal) => {
         }
     }
     return bindObj;
-}
+};
 
 module.exports = {
     bind,
     bindRtn,
-}
+};

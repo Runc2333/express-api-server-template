@@ -1,8 +1,7 @@
-processPath = process.cwd();
+global.processPath = process.cwd();
 require(processPath + '/config/config'); // Avoiding package tools such as pkg pack the config.
 require('./utils/autoloader');
 
-const path = require('path');
 const redis = require('redis');
 const morgan = require('morgan');
 const express = require('express');
@@ -69,10 +68,10 @@ app.use('/', indexRouter);
 /* 404 */
 app.use(function (_req, res) {
     stdrtn.notFound(res);
-})
+});
 
 /* 异常处理 */
-app.use(function (err, _req, res, _next) {
+app.use(function (err, _req, res) {
     logger.e(err);
     stdrtn.serverError(res);
 });

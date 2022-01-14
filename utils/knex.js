@@ -13,7 +13,7 @@ if (config.database.enable) {
     knex = () => {
         logger.e('Database is disabled but still being called while running.\nForcing program to stop...');
         process.exit(-1);
-    }
+    };
 }
 
 module.exports = knex;
