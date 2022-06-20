@@ -1,6 +1,6 @@
 module.exports = [{
-    method: 'GET',
+    method: "GET",
     handler: async (_req, res) => {
-        stdrtn.success(res, 'At your service');
-    }
+        stdrtn.success(res, "At your service");
+    },
 }];

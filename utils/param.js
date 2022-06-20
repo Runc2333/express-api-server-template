@@ -1,135 +1,159 @@
-const dateformat = require("dateformat");
-
-/* 绑定请求参数到输入模型 */
-const bind = (req, modal) => {
-    if (req.method === 'POST' || req.method === 'DELETE') {
-        let params = req.body;
-        let bindObj = {};
-        for (let key in modal) {
-            if (typeof params[key] === modal[key].type) { // 严格判断传入的数据类型
-                if (params[key] === '' && modal[key].required) { // 判断传入数据是否有效
-                    stdrtn.paramError(req.res);
-                    return false;
-                } else if (params[key] === '' && !modal[key].required) {
-                    // 绑定默认值
-                    if (typeof modal[key].default !== undefined) {
-                        bindObj[key] = modal[key].default;
-                    }
+const bind = (source, model, strict = false) => {
+    const result = {};
+    for (const key in model.params) {
+        const limits = model.params[key];
+        limits.required = limits.required || false;
+        const source_key = limits.keyname || key;
+        if (source[source_key] === undefined && limits.required) {
+            throw new Error(`${source_key} is required`);
+        }
+        if (source[source_key] === undefined && !limits.required) {
+            if (limits.default !== undefined) {
+                result[key] = limits.default;
+            }
+            continue;
+        }
+        switch (limits.type) {
+            case "string":
+                if (typeof source[source_key] !== "string") {
+                    if (strict) throw new Error(`${source_key} must be a string`);
+                    result[key] = String(source[source_key]);
                 } else {
-                    bindObj[key] = params[key];
-                    // 有效值
-                    if (typeof modal[key].valid !== 'undefined' && modal[key].valid.indexOf(params[key]) === -1) {
-                        stdrtn.paramError(req.res);
-                        return false;
-                    }
-                    // 上界
-                    if (typeof modal[key].upperlimit !== 'undefined' && params[key] > modal[key].upperlimit) {
-                        bindObj[key] = modal[key].upperlimit;
-                    }
+                    result[key] = source[source_key];
                 }
-            } else {
-                if (modal[key].required) {
-                    stdrtn.paramError(req.res);
-                    return false;
+                break;
+            case "number":
+                if (typeof source[source_key] !== "number") {
+                    if (strict) throw new Error(`${source_key} must be a number`);
+                    result[key] = Number(source[source_key]);
+                    break;
+                }
+                if (limits.upper_limit !== undefined && source[source_key] > limits.upper_limit) {
+                    if (strict) throw new Error(`${source_key} must be less than ${limits.upper_limit}`);
+                    result[key] = limits.upper_limit;
+                    break;
+                }
+                if (limits.lower_limit !== undefined && source[source_key] < limits.lower_limit) {
+                    if (strict) throw new Error(`${source_key} must be greater than ${limits.lower_limit}`);
+                    result[key] = limits.lower_limit;
+                    break;
+                }
+                result[key] = source[source_key];
+                break;
+            case "boolean":
+                if (typeof source[source_key] !== "boolean") {
+                    if (strict) throw new Error(`${source_key} must be a boolean`);
+                    result[key] = Boolean(source[source_key]);
                 } else {
-                    // 绑定默认值
-                    if (typeof modal[key].default !== undefined) {
-                        bindObj[key] = modal[key].default;
+                    result[key] = source[source_key];
+                }
+                break;
+            case "array":
+                if (!Array.isArray(source[source_key])) {
+                    if (strict) throw new Error(`${source_key} must be an array`);
+                    let temp;
+                    try {
+                        temp = JSON.parse(source[source_key]);
+                    } catch (e) {
+                        throw new Error(`${source_key} is not an array, and can not be parsed`);
+                    }
+                    if (!Array.isArray(temp)) {
+                        throw new Error(`${source_key} is not an array`);
+                    }
+                    result[key] = temp;
+                } else {
+                    result[key] = source[source_key];
+                }
+                break;
+            case "object":
+                if (typeof source[source_key] !== "object") {
+                    if (strict) throw new Error(`${source_key} must be an object`);
+                    let temp;
+                    try {
+                        temp = JSON.parse(source[source_key]);
+                    } catch (e) {
+                        throw new Error(`${source_key} is not an object, and can not be parsed`);
+                    }
+                    if (typeof temp !== "object") {
+                        throw new Error(`${source_key} is not an object`);
+                    }
+                    result[key] = temp;
+                } else {
+                    result[key] = source[source_key];
+                }
+                break;
+            default:
+                result[key] = source[source_key];
+                break;
+        }
+        if (["string", "number"].includes(limits.type)) {
+            if (limits.enum !== undefined && !limits.enum.includes(result[key])) {
+                throw new Error(`${source_key} must be one of ${limits.enum}`);
+            }
+            if (limits.length !== undefined) {
+                if (limits.length.min !== undefined && result[key].length < limits.length.min) {
+                    throw new Error(`${source_key} must be at least ${limits.length.min} characters`);
+                }
+                if (limits.length.max !== undefined && result[key].length > limits.length.max) {
+                    throw new Error(`${source_key} must be at most ${limits.length.max} characters`);
+                }
+            }
+        } else if (limits.type === "boolean") {
+            if (limits.enum !== undefined && !limits.enum.includes(result[key])) {
+                throw new Error(`${source_key} must be one of ${limits.enum}`);
+            }
+            if (limits.length !== undefined) {
+                throw new Error("Boolean type can not have length");
+            }
+        } else if (limits.type === "array") {
+            if (limits.enum !== undefined) {
+                for (const item of result[key]) {
+                    if (!limits.enum.includes(item)) {
+                        throw new Error(`${source_key} must be one of ${limits.enum}`);
                     }
                 }
             }
-        }
-        return bindObj;
-    } else if (req.method === 'GET') {
-        let params = req.query;
-        let bindObj = {};
-        for (let key in modal) {
-            if (typeof params[key] !== 'undefined') { // 不判断传入数据类型
-                // 强制转换为所需数据类型
-                switch (modal[key].type) {
-                    case 'string':
-                        if (String(params[key]) === '' && modal[key].required) { // 判断传入数据是否有效
-                            stdrtn.paramError(req.res);
-                            return false;
-                        } else if (String(params[key]) === '' && !modal[key].required) {
-                            // 绑定默认值
-                            if (typeof modal[key].default !== undefined) {
-                                bindObj[key] = modal[key].default;
-                            }
-                        } else {
-                            bindObj[key] = String(params[key]);
-                            // 有效值
-                            if (typeof modal[key].valid !== 'undefined' && modal[key].valid.indexOf(String(params[key])) === -1) {
-                                stdrtn.paramError(req.res);
-                                return false;
-                            }
-                        }
-                        break;
-                    case 'number':
-                        bindObj[key] = parseFloat(params[key]);
-                        // 有效值
-                        if (typeof modal[key].valid !== 'undefined' && modal[key].valid.indexOf(parseFloat(params[key])) === -1) {
-                            stdrtn.paramError(req.res);
-                            return false;
-                        }
-                        // 上界
-                        if (typeof modal[key].upperlimit !== 'undefined' && parseFloat(params[key]) > modal[key].upperlimit) {
-                            bindObj[key] = modal[key].upperlimit;
-                        }
-                        break;
-                    case 'boolean':
-                        bindObj[key] = params[key] ? true : false;
-                        break;
-                    default:
-                        // GET请求不能传递，也无法转换为Array、Object、Function
-                        stdrtn.serverError(req.res);
-                        break;
+            if (limits.length !== undefined) {
+                if (limits.length.min !== undefined && result[key].length < limits.length.min) {
+                    throw new Error(`${source_key} must have at least ${limits.length.min} items`);
                 }
-            } else {
-                if (modal[key].required) {
-                    stdrtn.paramError(req.res);
-                    return false;
-                } else {
-                    // 绑定默认值
-                    if (typeof modal[key].default !== undefined) {
-                        bindObj[key] = modal[key].default;
-                    }
+                if (limits.length.max !== undefined && result[key].length > limits.length.max) {
+                    throw new Error(`${source_key} must have at most ${limits.length.max} items`);
                 }
             }
+        } else if (limits.type === "object") {
+            if (limits.enum !== undefined) {
+                throw new Error("Object type is not supported for enum");
+            }
+            if (limits.length !== undefined) {
+                throw new Error("Object type is not supported for length");
+            }
         }
-        return bindObj;
     }
-};
-
-const bindRtn = (data, modal) => {
-    let bindObj = {};
-    for (let key in modal) {
-        if (typeof data[modal[key].keyname] !== 'undefined') { // 不判断传入数据类型
-            // 强制转换为所需数据类型
-            switch (modal[key].type) {
-                case 'string':
-                    if (data[modal[key].keyname] instanceof Date) {
-                        bindObj[key] = dateformat(data[modal[key].keyname], 'yyyy-mm-dd HH:MM:ss');
-                    } else {
-                        bindObj[key] = String(data[modal[key].keyname]);
-                    }
-                    break;
-                case 'number':
-                    bindObj[key] = isNaN(parseFloat(data[modal[key].keyname])) ? 0 : parseFloat(data[modal[key].keyname]);
-                    break;
-                case 'boolean':
-                    bindObj[key] = data[modal[key].keyname] ? true : false;
-                    break;
-                default:
-                    bindObj[key] = data[modal[key].keyname];
-                    break;
-            }
-        }
-    }
-    return bindObj;
+    return result;
 };
 
 module.exports = {
-    bind,
-    bindRtn,
+    bind: (data, model) => {
+        if (model.type === "request") {
+            try {
+                return bind(data.method === "GET" ? data.query : data.body, model, data.method !== "GET");
+            } catch (e) {
+                logger.d(e.stack);
+                stdrtn.param_error(data.res);
+                return false;
+            }
+        } else if (model.type === "response") {
+            try {
+                return bind(data, model);
+            } catch (e) {
+                logger.e(e.stack);
+                return false;
+            }
+        } else {
+            const e = new Error("Invalid model type");
+            logger.e(e.stack);
+            throw e;
+        }
+    },
 };

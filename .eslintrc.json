@@ -4,25 +4,56 @@
         "es2021": true,
         "node": true
     },
-    "extends": "eslint:recommended",
+    "extends": [
+        "eslint:recommended"
+    ],
     "parserOptions": {
         "ecmaVersion": "latest"
     },
     "rules": {
         "no-unused-vars": "error",
-        "semi": "error",
         "no-unexpected-multiline": "error",
         "space-before-function-paren": [
             "error",
             "always"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "quotes": [
+            "error",
+            "double"
+        ],
+        "comma-dangle": [
+            "error",
+            "always-multiline"
+        ],
+        "eol-last": [
+            "error",
+            "never"
+        ],
+        "object-shorthand": [
+            "error",
+            "never"
+        ],
+        "prefer-const": [
+            "error",
+            {
+                "destructuring": "any",
+                "ignoreReadBeforeAssign": false
+            }
         ]
     },
     "globals": {
+        "oss": "readonly",
         "knex": "readonly",
         "tools": "readonly",
+        "redis": "readonly",
         "config": "readonly",
         "logger": "readonly",
         "stdrtn": "readonly",
+        "params": "readonly",
         "processPath": "readonly"
     }
 }

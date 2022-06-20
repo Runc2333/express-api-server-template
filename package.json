@@ -8,7 +8,6 @@
     "dependencies": {
         "connect-redis": "^5.1.0",
         "cookie-parser": "~1.4.4",
-        "dateformat": "^4.5.1",
         "debug": "~2.6.9",
         "express": "~4.16.1",
         "express-fileupload": "^1.2.1",
@@ -18,5 +17,8 @@
         "morgan": "~1.9.1",
         "mysql": "^2.18.1",
         "redis": "^3.0.2"
+    },
+    "devDependencies": {
+        "eslint": "^8.18.0"
     }
 }

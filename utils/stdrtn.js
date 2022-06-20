@@ -2,12 +2,12 @@ const success = (res, data = null) => {
     if (data === null) {
         res.status(200).send(JSON.stringify({
             ret: 0,
-            message: 'ok',
+            message: "ok",
         }));
     } else {
         res.status(200).send(JSON.stringify({
             ret: 0,
-            message: 'ok',
+            message: "ok",
             data: data,
         }));
     }
@@ -20,39 +20,39 @@ const fail = (res, msg) => {
     }));
 };
 
-const notFound = (res) => {
+const not_found = (res) => {
     res.status(200).send(JSON.stringify({
         ret: -10000,
-        message: '未知API'
+        message: "resource not found",
     }));
 };
 
-const paramError = (res) => {
+const param_error = (res) => {
     res.status(200).send(JSON.stringify({
         ret: -10001,
-        message: '请求参数缺失或有误'
+        message: "bad request",
     }));
 };
 
-const serverError = (res) => {
+const server_error = (res) => {
     res.status(200).send(JSON.stringify({
         ret: -10002,
-        message: '服务器内部错误'
+        message: "internal server error",
     }));
 };
 
-const unknownError = (res) => {
+const unknown_error = (res) => {
     res.status(200).send(JSON.stringify({
         ret: -10003,
-        message: '未知错误'
+        message: "unknown error",
     }));
 };
 
 module.exports = {
-    success,
-    fail,
-    notFound,
-    paramError,
-    serverError,
-    unknownError,
+    success: success,
+    fail: fail,
+    not_found: not_found,
+    param_error: param_error,
+    server_error: server_error,
+    unknown_error: unknown_error,
 };

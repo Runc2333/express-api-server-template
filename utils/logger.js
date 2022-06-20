@@ -1,46 +1,45 @@
-const dateformat = require("dateformat");
 const fs = require("fs-extra");
 const path = require("path");
 
 // Hack fs-extra module.
-let append_to_log = (data) => {
+const append_to_log = (data) => {
     try {
         fs.ensureFileSync(path.join(
             config.log.folder,
-            `${config.log.log_split ? dateformat((new Date()), 'yyyy-mm-dd') : 'server'}.log`
+            `${config.log.log_split ? tools.date_format(new Date(), true) : "server"}.log`,
         ));
     } catch (e) {
-        throw new Error('Unable to create log file:' + e);
+        throw new Error("Unable to create log file:" + e);
     }
     try {
         fs.appendFileSync(path.join(
             config.log.folder,
-            `${config.log.log_split ? dateformat((new Date()), 'yyyy-mm-dd') : 'server'}.log`
+            `${config.log.log_split ? tools.date_format(new Date(), true) : "server"}.log`,
         ), data);
     } catch (e) {
-        throw new Error('Unable to append log file:' + e);
+        throw new Error("Unable to append log file:" + e);
     }
 };
 
 let t = (() => {
-    let conditons = ['trace'];
+    const conditons = ["trace"];
     if (conditons.includes(config.log.console_level) && conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[40;97m"}[TRACE]${"\033[0m"} ${line}`);
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [TRACE] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[40;97m"}[TRACE]${"\033[0m"} ${line}`);
+                append_to_log(`[${tools.date_format(new Date())}] [TRACE] ${line}\n`);
             });
         };
     } else if (conditons.includes(config.log.console_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[40;97m"}[TRACE]${"\033[0m"} ${line}`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[40;97m"}[TRACE]${"\033[0m"} ${line}`);
             });
         };
     } else if (conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [TRACE] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                append_to_log(`[${tools.date_format(new Date())}] [TRACE] ${line}\n`);
             });
         };
     } else {
@@ -49,24 +48,24 @@ let t = (() => {
 })(), trace = t;
 
 let d = (() => {
-    let conditons = ['trace', 'debug'];
+    const conditons = ["trace", "debug"];
     if (conditons.includes(config.log.console_level) && conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[40;97m"}[DEBUG]${"\033[0m"} ${line}`);
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [DEBUG] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[40;97m"}[DEBUG]${"\033[0m"} ${line}`);
+                append_to_log(`[${tools.date_format(new Date())}] [DEBUG] ${line}\n`);
             });
         };
     } else if (conditons.includes(config.log.console_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[40;97m"}[DEBUG]${"\033[0m"} ${line}`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[40;97m"}[DEBUG]${"\033[0m"} ${line}`);
             });
         };
     } else if (conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [DEBUG] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                append_to_log(`[${tools.date_format(new Date())}] [DEBUG] ${line}\n`);
             });
         };
     } else {
@@ -75,24 +74,24 @@ let d = (() => {
 })(), debug = d;
 
 let i = (() => {
-    let conditons = ['trace', 'debug', 'info'];
+    const conditons = ["trace", "debug", "info"];
     if (conditons.includes(config.log.console_level) && conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [INFO] ${line}`);
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [INFO] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] [INFO] ${line}`);
+                append_to_log(`[${tools.date_format(new Date())}] [INFO] ${line}\n`);
             });
         };
     } else if (conditons.includes(config.log.console_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [INFO] ${line}`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] [INFO] ${line}`);
             });
         };
     } else if (conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [INFO] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                append_to_log(`[${tools.date_format(new Date())}] [INFO] ${line}\n`);
             });
         };
     } else {
@@ -101,24 +100,24 @@ let i = (() => {
 })(), info = i;
 
 let w = (() => {
-    let conditons = ['trace', 'debug', 'info', 'warn'];
+    const conditons = ["trace", "debug", "info", "warn"];
     if (conditons.includes(config.log.console_level) && conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[44;97m"}[WARN]${"\033[0m"} ${line}`);
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [WARN] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[44;97m"}[WARN]${"\033[0m"} ${line}`);
+                append_to_log(`[${tools.date_format(new Date())}] [WARN] ${line}\n`);
             });
         };
     } else if (conditons.includes(config.log.console_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[44;97m"}[WARN]${"\033[0m"} ${line}`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[44;97m"}[WARN]${"\033[0m"} ${line}`);
             });
         };
     } else if (conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [WARN] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                append_to_log(`[${tools.date_format(new Date())}] [WARN] ${line}\n`);
             });
         };
     } else {
@@ -127,24 +126,24 @@ let w = (() => {
 })(), warn = w;
 
 let e = (() => {
-    let conditons = ['trace', 'debug', 'info', 'warn', 'error'];
+    const conditons = ["trace", "debug", "info", "warn", "error"];
     if (conditons.includes(config.log.console_level) && conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[41;97m"}[ERROR]${"\033[0m"} ${line}`);
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [ERROR] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[41;97m"}[ERROR]${"\033[0m"} ${line}`);
+                append_to_log(`[${tools.date_format(new Date())}] [ERROR] ${line}\n`);
             });
         };
     } else if (conditons.includes(config.log.console_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                console.log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] ${"\033[41;97m"}[ERROR]${"\033[0m"} ${line}`);
+            String(msg).split("\n").forEach((line) => {
+                console.log(`[${tools.date_format(new Date())}] ${"\033[41;97m"}[ERROR]${"\033[0m"} ${line}`);
             });
         };
     } else if (conditons.includes(config.log.log_level)) {
         return (msg) => {
-            String(msg).split('\n').forEach((line) => {
-                append_to_log(`[${dateformat((new Date()), 'yyyy-mm-dd HH:MM:ss')}] [ERROR] ${line}\n`);
+            String(msg).split("\n").forEach((line) => {
+                append_to_log(`[${tools.date_format(new Date())}] [ERROR] ${line}\n`);
             });
         };
     } else {
@@ -157,14 +156,14 @@ if (!config.log.enable) {
 }
 
 module.exports = {
-    t,
-    trace,
-    d,
-    debug,
-    i,
-    info,
-    w,
-    warn,
-    e,
-    error,
+    t: t,
+    trace: trace,
+    d: d,
+    debug: debug,
+    i: i,
+    info: info,
+    w: w,
+    warn: warn,
+    e: e,
+    error: error,
 };
