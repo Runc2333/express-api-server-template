@@ -3,7 +3,9 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "start": "node ./bin/www"
+        "start": "node ./bin/www",
+        "dev": "supervisor --ignore node_modules,log --no-restart-on error --no-restart-on exit --inspect -- bin/www",
+        "test": "jest"
     },
     "dependencies": {
         "connect-redis": "^5.1.0",
@@ -19,6 +21,8 @@
         "redis": "^3.0.2"
     },
     "devDependencies": {
-        "eslint": "^8.18.0"
+        "eslint": "^8.18.0",
+        "jest": "^28.1.1",
+        "supervisor": "^0.12.0"
     }
 }

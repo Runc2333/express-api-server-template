@@ -33,7 +33,7 @@ app.use(cookieParser());
 
 /* 文件上传 */
 app.use(fileUpload({
-    limits: { fileSize: config.file.maxUploadSize * 1024 * 1024 },
+    limits: { fileSize: config.file.max_upload_size * 1024 * 1024 },
 }));
 
 /* 可信代理 */
@@ -48,38 +48,46 @@ if (config.redis.enable) {
         password: config.redis.password,
     });
     app.use(session({
+        proxy: true,
         store: new RedisStore({ client: redisClient }),
         secret: config.session.secret,
         resave: false,
         rolling: true,
         saveUninitialized: true,
-        cookie: ("name", "value", { maxAge: 1 * 60 * 60 * 1000, secure: false }),
+        cookie: ("name", "value", { maxAge: 15 * 24 * 60 * 60 * 1000, secure: true, sameSite: "none" }),
     }));
 } else {
     app.use(session({
+        proxy: true,
         secret: config.session.secret,
         resave: false,
         rolling: true,
         saveUninitialized: true,
-        cookie: ("name", "value", { maxAge: 1 * 60 * 60 * 1000, secure: false }),
+        cookie: ("name", "value", { maxAge: 15 * 24 * 60 * 60 * 1000, secure: true, sameSite: "none" }),
     }));
 }
+
+/* 所有返回格式都应为 JSON */
+app.all("*", function (req, res, next) {
+    res.header("Content-Type", "application/json;charset=utf-8");
+    next();
+});
 
 /* 注册路由 */
 app.use("/", routerAutoloader);
 
 /* 404 */
 app.use((_req, res) => {
-    stdrtn.notFound(res);
+    stdrtn.not_found(res);
 });
 
 /* 异常处理 */
 app.use((err, _req, res) => {
     logger.e(err);
-    stdrtn.serverError(res);
+    stdrtn.server_error(res);
 });
 
-/* 捕获所有异常 */
+/* 兜底策略: 捕获所有异常 */
 // Catch uncaught exceptions.
 process.on("uncaughtException", (err) => {
     logger.e(`Uncaught Exception: ${err.stack}`);
